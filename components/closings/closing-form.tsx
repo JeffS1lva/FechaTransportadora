@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Progress } from "@/components/ui/progress"
-import { Plus, Package, DollarSign, Clock, TrendingUp, AlertCircle, CheckCircle2, Calculator, Info } from "lucide-react"
+import { Plus, Package, DollarSign, Clock, TrendingUp, AlertCircle, CheckCircle2, Calculator, Info, User, Calendar, Fuel, Receipt, Timer } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { ClosingFormData } from "@/lib/types"
 
@@ -82,6 +82,7 @@ interface CurrencyInputProps {
   disabled?: boolean
   hint?: string
   id?: string
+  icon?: React.ReactNode
 }
 
 function CurrencyInput({ 
@@ -94,7 +95,8 @@ function CurrencyInput({
   placeholder = "0,00", 
   disabled,
   hint,
-  id 
+  id,
+  icon
 }: CurrencyInputProps) {
   const [isFocused, setIsFocused] = useState(false)
   const { displayValue, numericValue, handleChange, setValue } = useCurrencyInput(value)
@@ -112,11 +114,12 @@ function CurrencyInput({
 
   return (
     <div className="space-y-1.5">
-      <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+      <label className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-1.5">
+        {icon}
         {label}
       </label>
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium text-sm">
           R$
         </span>
         <Input
@@ -128,7 +131,7 @@ function CurrencyInput({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           className={cn(
-            "pl-10 text-right font-mono",
+            "pl-10 text-right font-mono h-10 sm:h-11",
             error && "border-destructive focus-visible:ring-destructive"
           )}
           placeholder={placeholder}
@@ -154,6 +157,7 @@ interface NumberInputProps {
   disabled?: boolean
   hint?: string
   id?: string
+  icon?: React.ReactNode
 }
 
 function NumberInput({ 
@@ -167,7 +171,8 @@ function NumberInput({
   placeholder = "0",
   disabled,
   hint,
-  id
+  id,
+  icon
 }: NumberInputProps) {
   const [displayValue, setDisplayValue] = useState(value.toString())
 
@@ -183,7 +188,8 @@ function NumberInput({
 
   return (
     <div className="space-y-1.5">
-      <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+      <label className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-1.5">
+        {icon}
         {label}
       </label>
       <div className="relative">
@@ -194,8 +200,8 @@ function NumberInput({
           value={displayValue}
           onChange={handleChange}
           className={cn(
-            "text-right font-mono",
-            suffix && "pr-8",
+            "text-right font-mono h-10 sm:h-11",
+            suffix && "pr-10",
             error && "border-destructive focus-visible:ring-destructive"
           )}
           placeholder={placeholder}
@@ -382,35 +388,42 @@ export function ClosingForm() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2">
+        <Button className="gap-2 w-full sm:w-auto h-10 sm:h-11">
           <Plus className="h-4 w-4" />
-          Novo Fechamento
+          <span className="hidden sm:inline">Novo Fechamento</span>
+          <span className="sm:hidden">Novo</span>
         </Button>
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-2xl max-h-[95vh] overflow-y-auto p-0">
-        <DialogHeader className="px-6 pt-6 pb-2">
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <Calculator className="h-5 w-5 text-primary" />
-            Novo Fechamento
+      <DialogContent className="w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] md:max-w-3xl max-h-[95vh] overflow-y-auto p-0">
+        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-2">
+          <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Calculator className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            </div>
+            <span>Novo Fechamento</span>
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs sm:text-sm">
             Preencha os dados do período para calcular automaticamente os valores.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 px-6 pb-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 px-4 sm:px-6 pb-4 sm:pb-6">
           {/* Header com seleção de motorista e período */}
           <Card className="border-border/50">
-            <CardContent className="p-4 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-1 space-y-1.5">
-                  <label className="text-sm font-medium">Motorista</label>
+            <CardContent className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs sm:text-sm font-medium flex items-center gap-1.5">
+                    <User className="h-3.5 w-3.5 text-muted-foreground" />
+                    Motorista
+                  </label>
                   <Select
                     value={formData.driverId}
                     onValueChange={(value) => updateField("driverId", value)}
                   >
                     <SelectTrigger className={cn(
+                      "h-10 sm:h-11",
                       validation.errors.driverId && "border-destructive"
                     )}>
                       <SelectValue placeholder="Selecione..." />
@@ -419,9 +432,9 @@ export function ClosingForm() {
                       {activeDrivers.map((driver) => (
                         <SelectItem key={driver.id} value={driver.id}>
                           <div className="flex items-center gap-2">
-                            <span>{driver.name}</span>
+                            <span className="text-sm">{driver.name}</span>
                             {driver.vehicle && (
-                              <Badge variant="secondary" className="text-xs">
+                              <Badge variant="secondary" className="text-[10px] sm:text-xs">
                                 {driver.vehicle}
                               </Badge>
                             )}
@@ -436,24 +449,32 @@ export function ClosingForm() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium">Início do Período</label>
+                  <label className="text-xs sm:text-sm font-medium flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                    Início do Período
+                  </label>
                   <Input
                     type="date"
                     value={formData.periodStart}
                     onChange={(e) => updateField("periodStart", e.target.value)}
                     className={cn(
+                      "h-10 sm:h-11",
                       validation.errors.period && "border-destructive"
                     )}
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium">Fim do Período</label>
+                  <label className="text-xs sm:text-sm font-medium flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                    Fim do Período
+                  </label>
                   <Input
                     type="date"
                     value={formData.periodEnd}
                     onChange={(e) => updateField("periodEnd", e.target.value)}
                     className={cn(
+                      "h-10 sm:h-11",
                       validation.errors.period && "border-destructive"
                     )}
                   />
@@ -471,42 +492,45 @@ export function ClosingForm() {
 
           {/* Tabs com conteúdo */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 h-11">
-              <TabsTrigger value="deliveries" className="gap-2 data-[state=active]:bg-primary/10">
-                <Package className="h-4 w-4" />
+            <TabsList className="grid w-full grid-cols-3 h-10 sm:h-11">
+              <TabsTrigger value="deliveries" className="gap-1 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-primary/10">
+                <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">Entregas</span>
                 <span className="sm:hidden">Entregas</span>
               </TabsTrigger>
-              <TabsTrigger value="financial" className="gap-2 data-[state=active]:bg-primary/10">
-                <DollarSign className="h-4 w-4" />
+              <TabsTrigger value="financial" className="gap-1 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-primary/10">
+                <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">Financeiro</span>
-                <span className="sm:hidden">Finan.</span>
+                <span className="sm:hidden">Financ.</span>
               </TabsTrigger>
-              <TabsTrigger value="hours" className="gap-2 data-[state=active]:bg-primary/10">
-                <Clock className="h-4 w-4" />
+              <TabsTrigger value="hours" className="gap-1 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-primary/10">
+                <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">Horas</span>
                 <span className="sm:hidden">Horas</span>
               </TabsTrigger>
             </TabsList>
 
             {/* Tab Entregas */}
-            <TabsContent value="deliveries" className="mt-4 space-y-4">
+            <TabsContent value="deliveries" className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
               <Card>
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base font-semibold flex items-center gap-2">
+                    <CardTitle className="text-sm sm:text-base font-semibold flex items-center gap-2">
                       <Package className="h-4 w-4 text-primary" />
                       Dados de Entregas
                     </CardTitle>
                     {calculations.completionRate > 0 && (
-                      <Badge variant={calculations.completionRate >= 90 ? "default" : calculations.completionRate >= 70 ? "secondary" : "destructive"}>
-                        {calculations.completionRate.toFixed(1)}% concluídas
+                      <Badge 
+                        variant={calculations.completionRate >= 90 ? "default" : calculations.completionRate >= 70 ? "secondary" : "destructive"}
+                        className="text-[10px] sm:text-xs"
+                      >
+                        {calculations.completionRate.toFixed(1)}%
                       </Badge>
                     )}
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                <CardContent className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <NumberInput
                       id="totalDeliveries"
                       label="Total de Entregas"
@@ -514,28 +538,31 @@ export function ClosingForm() {
                       onChange={(v) => updateField("totalDeliveries", v)}
                       error={validation.errors.totalDeliveries}
                       hint="Programadas no período"
+                      icon={<Package className="h-3.5 w-3.5 text-muted-foreground" />}
                     />
                     <NumberInput
                       id="completedDeliveries"
-                      label="Entregas Concluídas"
+                      label="Concluídas"
                       value={formData.completedDeliveries}
                       onChange={(v) => updateField("completedDeliveries", v)}
                       error={validation.errors.completedDeliveries}
                       hint="Realizadas com sucesso"
+                      icon={<CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />}
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <NumberInput
                       id="canceledDeliveries"
-                      label="Entregas Canceladas"
+                      label="Canceladas"
                       value={formData.canceledDeliveries}
                       onChange={(v) => {
                         setTouchedFields(prev => new Set(prev).add("canceledDeliveries"))
                         updateField("canceledDeliveries", v)
                       }}
                       error={validation.errors.canceledDeliveries || validation.errors.deliveriesSum}
-                      hint={!touchedFields.has("canceledDeliveries") ? "Calculado automaticamente" : "Editado manualmente"}
+                      hint={!touchedFields.has("canceledDeliveries") ? "Auto" : "Manual"}
+                      icon={<AlertCircle className="h-3.5 w-3.5 text-muted-foreground" />}
                     />
                     <NumberInput
                       id="kmDriven"
@@ -544,21 +571,22 @@ export function ClosingForm() {
                       onChange={(v) => updateField("kmDriven", v)}
                       suffix="km"
                       hint="Total percorrido"
+                      icon={<TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />}
                     />
                   </div>
 
                   {formData.kmDriven > 0 && formData.completedDeliveries > 0 && (
-                    <div className="rounded-lg bg-muted/50 p-3 text-sm">
+                    <div className="rounded-lg bg-muted/50 p-2.5 sm:p-3 text-xs sm:text-sm space-y-1">
                       <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Média por entrega:</span>
+                        <span className="text-muted-foreground">Média/entrega:</span>
                         <span className="font-medium font-mono">
                           {(formData.kmDriven / formData.completedDeliveries).toFixed(1)} km
                         </span>
                       </div>
-                      <div className="flex justify-between items-center mt-1">
-                        <span className="text-muted-foreground">Receita por km:</span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Receita/km:</span>
                         <span className="font-medium font-mono text-primary">
-                          {currencyFormatter.format(calculations.kmRate)}/km
+                          {currencyFormatter.format(calculations.kmRate)}
                         </span>
                       </div>
                     </div>
@@ -575,25 +603,29 @@ export function ClosingForm() {
             </TabsContent>
 
             {/* Tab Financeiro */}
-            <TabsContent value="financial" className="mt-4 space-y-4">
+            <TabsContent value="financial" className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
               <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
+                  <CardTitle className="text-sm sm:text-base font-semibold flex items-center gap-2">
                     <DollarSign className="h-4 w-4 text-primary" />
                     Dados Financeiros
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                <CardContent className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <CurrencyInput
                       id="grossValue"
                       label="Valor Bruto"
                       value={formData.grossValue}
                       onChange={(v) => updateField("grossValue", v)}
-                      hint="Receita total do período"
+                      hint="Receita total"
+                      icon={<DollarSign className="h-3.5 w-3.5 text-muted-foreground" />}
                     />
                     <div className="space-y-1.5">
-                      <label className="text-sm font-medium">Taxa de Comissão</label>
+                      <label className="text-xs sm:text-sm font-medium flex items-center gap-1.5">
+                        <Receipt className="h-3.5 w-3.5 text-muted-foreground" />
+                        Comissão (%)
+                      </label>
                       <div className="relative">
                         <Input
                           type="number"
@@ -602,11 +634,11 @@ export function ClosingForm() {
                           min={0}
                           max={100}
                           className={cn(
-                            "pr-8 text-right font-mono",
+                            "pr-10 text-right font-mono h-10 sm:h-11",
                             validation.errors.commissionRate && "border-destructive"
                           )}
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
                           %
                         </span>
                       </div>
@@ -614,51 +646,54 @@ export function ClosingForm() {
                         <p className="text-xs text-destructive">{validation.errors.commissionRate}</p>
                       )}
                       {!validation.errors.commissionRate && (
-                        <p className="text-xs text-muted-foreground">Percentual sobre o bruto</p>
+                        <p className="text-xs text-muted-foreground">Sobre o bruto</p>
                       )}
                     </div>
                   </div>
 
-                  <Separator className="my-4" />
+                  <Separator className="my-2 sm:my-4" />
 
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <CurrencyInput
                       id="fuelCost"
                       label="Combustível"
                       value={formData.fuelCost}
                       onChange={(v) => updateField("fuelCost", v)}
                       hint="Abastecimento"
+                      icon={<Fuel className="h-3.5 w-3.5 text-muted-foreground" />}
                     />
                     <CurrencyInput
                       id="advances"
                       label="Adiantamentos"
                       value={formData.advances}
                       onChange={(v) => updateField("advances", v)}
-                      hint="Vales/adiant."
+                      hint="Vales"
+                      icon={<Receipt className="h-3.5 w-3.5 text-muted-foreground" />}
                     />
                     <CurrencyInput
                       id="discounts"
                       label="Descontos"
                       value={formData.discounts}
                       onChange={(v) => updateField("discounts", v)}
-                      hint="Outros descontos"
+                      hint="Outros"
+                      icon={<AlertCircle className="h-3.5 w-3.5 text-muted-foreground" />}
                     />
                   </div>
 
                   {/* Resumo Financeiro */}
-                  <div className="rounded-lg bg-muted/50 p-4 space-y-3">
-                    <h4 className="text-sm font-semibold flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4" />
-                      Resumo do Cálculo
+                  <div className="rounded-lg bg-muted/50 p-3 sm:p-4 space-y-2 sm:space-y-3">
+                    <h4 className="text-xs sm:text-sm font-semibold flex items-center gap-2">
+                      <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      Resumo
                     </h4>
                     
-                    <div className="space-y-2 text-sm">
+                    <div className="space-y-1.5 text-xs sm:text-sm">
                       <div className="flex justify-between text-muted-foreground">
-                        <span>Valor Bruto:</span>
+                        <span>Bruto:</span>
                         <span className="font-mono">{currencyFormatter.format(formData.grossValue)}</span>
                       </div>
                       <div className="flex justify-between text-destructive">
-                        <span>Comissão ({formData.commissionRate}%):</span>
+                        <span>Comissão:</span>
                         <span className="font-mono">-{currencyFormatter.format(calculations.commission)}</span>
                       </div>
                       <div className="flex justify-between text-destructive">
@@ -666,7 +701,7 @@ export function ClosingForm() {
                         <span className="font-mono">-{currencyFormatter.format(formData.fuelCost)}</span>
                       </div>
                       <div className="flex justify-between text-destructive">
-                        <span>Adiantamentos:</span>
+                        <span>Adiant.:</span>
                         <span className="font-mono">-{currencyFormatter.format(formData.advances)}</span>
                       </div>
                       <div className="flex justify-between text-destructive">
@@ -674,10 +709,10 @@ export function ClosingForm() {
                         <span className="font-mono">-{currencyFormatter.format(formData.discounts)}</span>
                       </div>
                       
-                      <Separator />
+                      <Separator className="my-1" />
                       
-                      <div className="flex justify-between font-semibold text-base pt-1">
-                        <span>Valor Líquido:</span>
+                      <div className="flex justify-between font-semibold text-sm sm:text-base pt-1">
+                        <span>Líquido:</span>
                         <span className={cn(
                           "font-mono",
                           calculations.netValue >= 0 ? "text-primary" : "text-destructive"
@@ -689,19 +724,15 @@ export function ClosingForm() {
 
                     {/* Barra de progresso visual */}
                     {formData.grossValue > 0 && (
-                      <div className="space-y-1 pt-2">
-                        <div className="flex justify-between text-xs text-muted-foreground">
+                      <div className="space-y-1 pt-1 sm:pt-2">
+                        <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
                           <span>Retenções</span>
                           <span>{((calculations.totalDeductions / formData.grossValue) * 100).toFixed(1)}%</span>
                         </div>
                         <Progress 
                           value={(calculations.netValue / formData.grossValue) * 100} 
-                          className="h-2"
+                          className="h-1.5 sm:h-2"
                         />
-                        <div className="flex justify-between text-xs">
-                          <span className="text-muted-foreground">Líquido</span>
-                          <span className="text-muted-foreground">Bruto</span>
-                        </div>
                       </div>
                     )}
                   </div>
@@ -724,16 +755,16 @@ export function ClosingForm() {
             </TabsContent>
 
             {/* Tab Horas */}
-            <TabsContent value="hours" className="mt-4 space-y-4">
+            <TabsContent value="hours" className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
               <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
+                  <CardTitle className="text-sm sm:text-base font-semibold flex items-center gap-2">
                     <Clock className="h-4 w-4 text-primary" />
                     Controle de Horas
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                <CardContent className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <NumberInput
                       id="regularHours"
                       label="Horas Regulares"
@@ -741,6 +772,7 @@ export function ClosingForm() {
                       onChange={(v) => updateField("regularHours", v)}
                       suffix="h"
                       hint="Padrão: 176h/mês"
+                      icon={<Timer className="h-3.5 w-3.5 text-muted-foreground" />}
                     />
                     <NumberInput
                       id="overtimeHours"
@@ -749,29 +781,30 @@ export function ClosingForm() {
                       onChange={(v) => updateField("overtimeHours", v)}
                       suffix="h"
                       hint="50% ou 100%"
+                      icon={<Timer className="h-3.5 w-3.5 text-muted-foreground" />}
                     />
                   </div>
 
-                  <div className="rounded-lg bg-muted/50 p-4">
+                  <div className="rounded-lg bg-muted/50 p-3 sm:p-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Total de Horas:</span>
-                      <span className="text-lg font-semibold font-mono">
+                      <span className="text-xs sm:text-sm font-medium">Total:</span>
+                      <span className="text-base sm:text-lg font-semibold font-mono">
                         {formData.regularHours + formData.overtimeHours}h
                       </span>
                     </div>
                     <Progress 
                       value={Math.min(((formData.regularHours + formData.overtimeHours) / 220) * 100, 100)} 
-                      className="h-2 mt-2"
+                      className="h-1.5 sm:h-2 mt-2"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Referência: 220h (limite mensal CLT)
+                    <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+                      Limite CLT: 220h mensais
                     </p>
                   </div>
 
                   {formData.overtimeHours > 40 && (
                     <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 p-2 rounded-md">
                       <AlertCircle className="h-4 w-4 shrink-0" />
-                      Alto volume de horas extras - verificar conforme CLT
+                      Alto volume de horas extras - verificar CLT
                     </div>
                   )}
                 </CardContent>
@@ -782,15 +815,15 @@ export function ClosingForm() {
           {/* Alertas globais */}
           {(hasErrors || hasWarnings) && (
             <div className={cn(
-              "rounded-lg p-3 text-sm flex items-start gap-2",
+              "rounded-lg p-2.5 sm:p-3 text-xs sm:text-sm flex items-start gap-2",
               hasErrors ? "bg-destructive/10 text-destructive" : "bg-amber-50 text-amber-700"
             )}>
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium">
-                  {hasErrors ? "Corrija os erros antes de salvar:" : "Atenção:"}
+                  {hasErrors ? "Corrija os erros:" : "Atenção:"}
                 </p>
-                <ul className="list-disc list-inside text-xs mt-1 space-y-0.5">
+                <ul className="list-disc list-inside text-[10px] sm:text-xs mt-1 space-y-0.5">
                   {Object.values(validation.errors).map((err, i) => (
                     <li key={`err-${i}`}>{err}</li>
                   ))}
@@ -803,17 +836,22 @@ export function ClosingForm() {
           )}
 
           {/* Footer com ações */}
-          <div className="flex justify-between items-center pt-2 border-t">
-            <div className="text-sm text-muted-foreground">
+          <div className="flex flex-col-reverse sm:flex-row justify-between items-center gap-3 sm:gap-0 pt-2 border-t">
+            <div className="text-xs sm:text-sm text-muted-foreground w-full sm:w-auto text-center sm:text-left">
               {formData.driverId && (
-                <span className="flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3 text-primary" />
+                <span className="flex items-center justify-center sm:justify-start gap-1">
+                  <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
                   Motorista selecionado
                 </span>
               )}
             </div>
-            <div className="flex gap-2">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setOpen(false)}
+                className="flex-1 sm:flex-none h-10 sm:h-11"
+              >
                 Cancelar
               </Button>
               <TooltipProvider>
@@ -822,15 +860,16 @@ export function ClosingForm() {
                     <Button 
                       type="submit" 
                       disabled={!validation.isValid}
-                      className="gap-2"
+                      className="gap-2 flex-1 sm:flex-none h-10 sm:h-11"
                     >
                       <Calculator className="h-4 w-4" />
-                      Criar Fechamento
+                      <span className="hidden sm:inline">Criar Fechamento</span>
+                      <span className="sm:hidden">Criar</span>
                     </Button>
                   </TooltipTrigger>
                   {!validation.isValid && (
                     <TooltipContent>
-                      <p>Preencha todos os campos obrigatórios</p>
+                      <p className="text-xs">Preencha todos os campos obrigatórios</p>
                     </TooltipContent>
                   )}
                 </Tooltip>

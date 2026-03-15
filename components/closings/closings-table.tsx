@@ -57,7 +57,10 @@ import {
   DollarSign,
   User,
   Clock,
-  Package
+  Package,
+  Calculator,
+  TrendingUp,
+  Wallet
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import type { Closing } from "@/lib/types"
@@ -115,6 +118,7 @@ export function ClosingsTable() {
   const { user } = useAuth()
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [viewClosing, setViewClosing] = useState<Closing | null>(null)
+  // Desktop > 1300px é lista por padrão, abaixo disso sempre cards
   const [viewMode, setViewMode] = useState<ViewMode>("list")
   const [sortField, setSortField] = useState<SortField>("createdAt")
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc")
@@ -229,7 +233,7 @@ export function ClosingsTable() {
   const visiblePages = useMemo(() => {
     const pages: (number | string)[] = []
 
-    if (totalPages <= 7) {
+    if (totalPages <= 5) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i)
       }
@@ -323,14 +327,14 @@ export function ClosingsTable() {
     }
   }
 
-  // Componente de paginação reutilizável
+  // Componente de paginação reutilizável - responsivo
   const PaginationComponent = () => {
     if (filteredClosings.length <= itemsPerPage) return null
 
     return (
-      <div className="flex justify-end">
-        <Pagination>
-          <PaginationContent>
+      <div className="flex justify-center min-[1300px]:justify-end mt-4">
+        <Pagination className="flex-wrap gap-2">
+          <PaginationContent className="flex-wrap justify-center">
             <PaginationItem>
               <PaginationPrevious
                 href="#"
@@ -339,30 +343,34 @@ export function ClosingsTable() {
                   setCurrentPage(prev => Math.max(1, prev - 1))
                 }}
                 className={cn(
+                  "h-9 w-9 min-[1300px]:h-auto min-[1300px]:w-auto p-0 min-[1300px]:px-4",
                   currentPage === 1 && "pointer-events-none opacity-50"
                 )}
                 aria-disabled={currentPage === 1}
               />
             </PaginationItem>
 
-            {visiblePages.map((page, index) => (
-              <PaginationItem key={`${page}-${index}`}>
-                {page === 'ellipsis-start' || page === 'ellipsis-end' ? (
-                  <PaginationEllipsis />
-                ) : (
-                  <PaginationLink
-                    href="#"
-                    isActive={currentPage === page}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      setCurrentPage(Number(page))
-                    }}
-                  >
-                    {page}
-                  </PaginationLink>
-                )}
-              </PaginationItem>
-            ))}
+            <div className="flex flex-wrap justify-center gap-1">
+              {visiblePages.map((page, index) => (
+                <PaginationItem key={`${page}-${index}`}>
+                  {page === 'ellipsis-start' || page === 'ellipsis-end' ? (
+                    <PaginationEllipsis className="h-9 w-9" />
+                  ) : (
+                    <PaginationLink
+                      href="#"
+                      isActive={currentPage === page}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setCurrentPage(Number(page))
+                      }}
+                      className="h-9 w-9 min-[1300px]:h-auto min-[1300px]:w-auto min-[1300px]:px-3 text-sm"
+                    >
+                      {page}
+                    </PaginationLink>
+                  )}
+                </PaginationItem>
+              ))}
+            </div>
 
             <PaginationItem>
               <PaginationNext
@@ -372,6 +380,7 @@ export function ClosingsTable() {
                   setCurrentPage(prev => Math.min(totalPages, prev + 1))
                 }}
                 className={cn(
+                  "h-9 w-9 min-[1300px]:h-auto min-[1300px]:w-auto p-0 min-[1300px]:px-4",
                   currentPage === totalPages && "pointer-events-none opacity-50"
                 )}
                 aria-disabled={currentPage === totalPages}
@@ -384,24 +393,25 @@ export function ClosingsTable() {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header de Controle */}
-      <div className="flex flex-col gap-4 p-4 bg-card rounded-xl border shadow-sm">
-        <div className="flex items-center justify-between">
+    <div className="space-y-4  min-[1300px]:px-0">
+      {/* Header de Controle - Responsivo */}
+      <div className="flex flex-col gap-4 p-3 sm:p-4 bg-card rounded-xl border shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
               <FileText className="h-5 w-5 text-primary" />
             </div>
-            <div>
-              <h2 className="text-lg font-semibold">Fechamentos</h2>
-              <p className="text-sm text-muted-foreground">
-                {filteredClosings.length} {filteredClosings.length === 1 ? 'registro' : 'registros'} encontrados
-                {selectedClosings.size > 0 && ` • ${selectedClosings.size} selecionado(s)`}
+            <div className="min-w-0">
+              <h2 className="text-lg font-semibold truncate">Fechamentos</h2>
+              <p className="text-sm text-muted-foreground truncate">
+                {filteredClosings.length} {filteredClosings.length === 1 ? 'registro' : 'registros'}
+                {selectedClosings.size > 0 && ` • ${selectedClosings.size} selec.`}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Toggle de visualização - apenas desktop > 1300px */}
+          <div className="hidden min-[1300px]:flex items-center gap-2">
             <div className="flex items-center bg-muted rounded-lg p-1 border">
               <button
                 onClick={() => setViewMode("list")}
@@ -425,16 +435,16 @@ export function ClosingsTable() {
           </div>
         </div>
 
-        {/* Barra de Busca e Filtros */}
+        {/* Barra de Busca e Filtros - Responsiva */}
         <div className="flex flex-col gap-3">
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar por motorista..."
                 value={filters.search}
                 onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                className="pl-9"
+                className="pl-9 w-full"
               />
             </div>
 
@@ -443,10 +453,10 @@ export function ClosingsTable() {
                 <Button
                   variant={activeFiltersCount > 0 ? "default" : "outline"}
                   size="sm"
-                  className="gap-2"
+                  className="gap-2 shrink-0"
                 >
                   <Filter className="h-4 w-4" />
-                  Filtros
+                  <span className="hidden sm:inline">Filtros</span>
                   {activeFiltersCount > 0 && (
                     <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
                       {activeFiltersCount}
@@ -455,7 +465,7 @@ export function ClosingsTable() {
                   <ChevronDown className="h-3 w-3" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-80 p-4" align="end">
+              <PopoverContent className="w-[calc(100vw-2rem)] sm:w-80 p-4" align="end">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h4 className="font-semibold text-sm">Filtros Avançados</h4>
@@ -522,11 +532,11 @@ export function ClosingsTable() {
                             variant="outline"
                             size="sm"
                             className={cn(
-                              "justify-start text-left font-normal",
+                              "justify-start text-left font-normal text-xs sm:text-sm",
                               !filters.dateFrom && "text-muted-foreground"
                             )}
                           >
-                            <CalendarIcon className="mr-2 h-3 w-3" />
+                            <CalendarIcon className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                             {filters.dateFrom ? format(filters.dateFrom, "dd/MM/yy") : "De"}
                           </Button>
                         </PopoverTrigger>
@@ -546,11 +556,11 @@ export function ClosingsTable() {
                             variant="outline"
                             size="sm"
                             className={cn(
-                              "justify-start text-left font-normal",
+                              "justify-start text-left font-normal text-xs sm:text-sm",
                               !filters.dateTo && "text-muted-foreground"
                             )}
                           >
-                            <CalendarIcon className="mr-2 h-3 w-3" />
+                            <CalendarIcon className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                             {filters.dateTo ? format(filters.dateTo, "dd/MM/yy") : "Até"}
                           </Button>
                         </PopoverTrigger>
@@ -578,11 +588,11 @@ export function ClosingsTable() {
             </Popover>
           </div>
 
-          {/* Chips de Filtros Ativos */}
+          {/* Chips de Filtros Ativos - Responsivos */}
           {activeFiltersCount > 0 && (
             <div className="flex flex-wrap gap-2">
               {filters.status !== "all" && (
-                <Badge variant="secondary" className="gap-1 px-2 py-1">
+                <Badge variant="secondary" className="gap-1 px-2 py-1 text-xs">
                   Status: {statusConfig[filters.status as keyof typeof statusConfig].label}
                   <button
                     onClick={() => setFilters(prev => ({ ...prev, status: "all" }))}
@@ -594,7 +604,7 @@ export function ClosingsTable() {
               )}
 
               {filters.driverId !== "all" && (
-                <Badge variant="secondary" className="gap-1 px-2 py-1">
+                <Badge variant="secondary" className="gap-1 px-2 py-1 text-xs">
                   Motorista: {drivers.find(d => d.id === filters.driverId)?.name}
                   <button
                     onClick={() => setFilters(prev => ({ ...prev, driverId: "all" }))}
@@ -606,7 +616,7 @@ export function ClosingsTable() {
               )}
 
               {(filters.dateFrom || filters.dateTo) && (
-                <Badge variant="secondary" className="gap-1 px-2 py-1">
+                <Badge variant="secondary" className="gap-1 px-2 py-1 text-xs">
                   Período: {filters.dateFrom ? format(filters.dateFrom, "dd/MM") : "Início"} - {filters.dateTo ? format(filters.dateTo, "dd/MM") : "Hoje"}
                   <button
                     onClick={() => setFilters(prev => ({ ...prev, dateFrom: undefined, dateTo: undefined }))}
@@ -621,295 +631,295 @@ export function ClosingsTable() {
         </div>
       </div>
 
-      {/* Conteúdo - Modo Lista */}
-      {viewMode === "list" && (
-        <>
-          <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-b bg-muted/50">
-                  <TableHead className="w-12 p-4">
-                    <button
-                      onClick={selectAll}
-                      className={cn(
-                        "w-5 h-5 rounded border flex items-center justify-center transition-colors",
-                        selectedClosings.size === filteredClosings.length && filteredClosings.length > 0
-                          ? "bg-primary border-primary text-primary-foreground"
-                          : "border-input hover:border-primary"
-                      )}
-                    >
-                      {selectedClosings.size === filteredClosings.length && filteredClosings.length > 0 && (
-                        <Check className="h-3 w-3" />
-                      )}
-                    </button>
-                  </TableHead>
-                  <TableHead className="text-left p-4">
-                    <button
-                      onClick={() => toggleSort("driverName")}
-                      className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground uppercase tracking-wider"
-                    >
-                      Motorista
-                      <ArrowUpDown className={cn(
-                        "h-3 w-3 transition-colors",
-                        sortField === "driverName" ? "text-primary" : "text-muted-foreground"
-                      )} />
-                    </button>
-                  </TableHead>
-                  <TableHead className="text-left p-4">
-                    <button
-                      onClick={() => toggleSort("period")}
-                      className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground uppercase tracking-wider"
-                    >
-                      Período
-                      <ArrowUpDown className={cn(
-                        "h-3 w-3 transition-colors",
-                        sortField === "period" ? "text-primary" : "text-muted-foreground"
-                      )} />
-                    </button>
-                  </TableHead>
-                  <TableHead className="text-left p-4">
-                    <button
-                      onClick={() => toggleSort("deliveries")}
-                      className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground uppercase tracking-wider"
-                    >
-                      Entregas
-                      <ArrowUpDown className={cn(
-                        "h-3 w-3 transition-colors",
-                        sortField === "deliveries" ? "text-primary" : "text-muted-foreground"
-                      )} />
-                    </button>
-                  </TableHead>
-                  <TableHead className="text-left p-4">
-                    <button
-                      onClick={() => toggleSort("netValue")}
-                      className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground uppercase tracking-wider"
-                    >
-                      Valor Líquido
-                      <ArrowUpDown className={cn(
-                        "h-3 w-3 transition-colors",
-                        sortField === "netValue" ? "text-primary" : "text-muted-foreground"
-                      )} />
-                    </button>
-                  </TableHead>
-                  <TableHead className="text-left p-4">
-                    <button
-                      onClick={() => toggleSort("hours")}
-                      className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground uppercase tracking-wider"
-                    >
-                      Horas
-                      <ArrowUpDown className={cn(
-                        "h-3 w-3 transition-colors",
-                        sortField === "hours" ? "text-primary" : "text-muted-foreground"
-                      )} />
-                    </button>
-                  </TableHead>
-                  <TableHead className="text-left p-4">
-                    <button
-                      onClick={() => toggleSort("status")}
-                      className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground uppercase tracking-wider"
-                    >
-                      Status
-                      <ArrowUpDown className={cn(
-                        "h-3 w-3 transition-colors",
-                        sortField === "status" ? "text-primary" : "text-muted-foreground"
-                      )} />
-                    </button>
-                  </TableHead>
-                  {canManage && <TableHead className="w-16 p-4"></TableHead>}
-                </TableRow>
-              </TableHeader>
-              <TableBody className="divide-y">
-                {filteredClosings.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={canManage ? 8 : 7} className="p-12 text-center">
-                      <div className="flex flex-col items-center gap-3 text-muted-foreground">
-                        <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
-                          <FileText className="h-8 w-8 opacity-50" />
-                        </div>
-                        <div>
-                          <p className="font-medium">Nenhum fechamento encontrado</p>
-                          <p className="text-sm">Tente ajustar seus filtros ou busca</p>
-                        </div>
-                        {activeFiltersCount > 0 && (
-                          <Button variant="outline" size="sm" onClick={clearFilters} className="mt-2">
-                            <RotateCcw className="h-4 w-4 mr-2" />
-                            Limpar filtros
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  pagedClosings.map((closing) => {
-                    const isSelected = selectedClosings.has(closing.id)
-                    const status = statusConfig[closing.status]
-
-                    return (
-                      <TableRow
-                        key={closing.id}
-                        className={cn(
-                          "group transition-colors",
-                          isSelected ? "bg-primary/5" : "hover:bg-muted/50"
-                        )}
-                      >
-                        <TableCell className="p-4">
-                          <button
-                            onClick={() => toggleSelection(closing.id)}
-                            className={cn(
-                              "w-5 h-5 rounded border flex items-center justify-center transition-all",
-                              isSelected
-                                ? "bg-primary border-primary text-primary-foreground"
-                                : "border-input group-hover:border-primary"
-                            )}
-                          >
-                            {isSelected && <Check className="h-3 w-3" />}
-                          </button>
-                        </TableCell>
-
-                        <TableCell className="p-4">
-                          <div className="flex items-center gap-3">
-                            <div className={cn(
-                              "h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors",
-                              closing.status === "paid"
-                                ? "bg-emerald-100 text-emerald-700"
-                                : closing.status === "approved"
-                                  ? "bg-blue-100 text-blue-700"
-                                  : "bg-amber-100 text-amber-700"
-                            )}>
-                              {closing.driverName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-                            </div>
-                            <div>
-                              <p className="font-medium text-foreground">{closing.driverName}</p>
-
-                            </div>
-                          </div>
-                        </TableCell>
-
-                        <TableCell className="p-4">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <CalendarIcon className="h-3.5 w-3.5" />
-                            <span>
-                              {format(new Date(closing.period.start), "dd/MM/yyyy")} - {format(new Date(closing.period.end), "dd/MM/yyyy")}
-                            </span>
-                          </div>
-                        </TableCell>
-
-                        <TableCell className="p-4">
-                          <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center">
-                              <Package className="h-4 w-4 text-muted-foreground" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">{closing.deliveries.completed}/{closing.deliveries.total}</p>
-                              <p className="text-xs text-muted-foreground">entregas</p>
-                            </div>
-                          </div>
-                        </TableCell>
-
-                        <TableCell className="p-4">
-                          <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center">
-                              <DollarSign className="h-4 w-4 text-muted-foreground" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">
-                                {new Intl.NumberFormat("pt-BR", {
-                                  style: "currency",
-                                  currency: "BRL",
-                                }).format(closing.financial.netValue)}
-                              </p>
-                              <p className="text-xs text-muted-foreground">líquido</p>
-                            </div>
-                          </div>
-                        </TableCell>
-
-                        <TableCell className="p-4">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Clock className="h-3.5 w-3.5" />
-                            <span>{closing.hours.total}h</span>
-                          </div>
-                        </TableCell>
-
-                        <TableCell className="p-4">
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              "border-0 px-2.5 py-1 font-medium",
-                              status.bg,
-                              status.text,
-                              status.border
-                            )}
-                          >
-                            <span className={cn("w-1.5 h-1.5 rounded-full mr-1.5", status.dot)} />
-                            {status.label}
-                          </Badge>
-                        </TableCell>
-
-                        <TableCell className="p-4">
-                          <div className={cn(
-                            "flex items-center justify-end gap-1 transition-opacity duration-200",
-                            "opacity-0 group-hover:opacity-100"
-                          )}>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => setViewClosing(closing)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            {canManage && (
-                              <>
-                                {closing.status === "pending" && (
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-blue-600 hover:text-blue-600"
-                                    onClick={() => handleApprove(closing.id)}
-                                  >
-                                    <CheckCircle className="h-4 w-4" />
-                                  </Button>
-                                )}
-                                {closing.status === "approved" && (
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-emerald-600 hover:text-emerald-600"
-                                    onClick={() => handleMarkPaid(closing.id)}
-                                  >
-                                    <Banknote className="h-4 w-4" />
-                                  </Button>
-                                )}
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-destructive hover:text-destructive"
-                                  onClick={() => setDeleteId(closing.id)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
-
-          <PaginationComponent />
-        </>
-      )
-      }
-
-      {/* Conteúdo - Modo Cards */}
-      {
-        viewMode === "cards" && (
+      {/* Conteúdo - Modo Lista (apenas > 1300px) */}
+      <div className="hidden min-[1300px]:block">
+        {viewMode === "list" ? (
           <>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b bg-muted/50">
+                      <TableHead className="w-12 p-4">
+                        <button
+                          onClick={selectAll}
+                          className={cn(
+                            "w-5 h-5 rounded border flex items-center justify-center transition-colors",
+                            selectedClosings.size === filteredClosings.length && filteredClosings.length > 0
+                              ? "bg-primary border-primary text-primary-foreground"
+                              : "border-input hover:border-primary"
+                          )}
+                        >
+                          {selectedClosings.size === filteredClosings.length && filteredClosings.length > 0 && (
+                            <Check className="h-3 w-3" />
+                          )}
+                        </button>
+                      </TableHead>
+                      <TableHead className="text-left p-4">
+                        <button
+                          onClick={() => toggleSort("driverName")}
+                          className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground uppercase tracking-wider"
+                        >
+                          Motorista
+                          <ArrowUpDown className={cn(
+                            "h-3 w-3 transition-colors",
+                            sortField === "driverName" ? "text-primary" : "text-muted-foreground"
+                          )} />
+                        </button>
+                      </TableHead>
+                      <TableHead className="text-left p-4">
+                        <button
+                          onClick={() => toggleSort("period")}
+                          className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground uppercase tracking-wider"
+                        >
+                          Período
+                          <ArrowUpDown className={cn(
+                            "h-3 w-3 transition-colors",
+                            sortField === "period" ? "text-primary" : "text-muted-foreground"
+                          )} />
+                        </button>
+                      </TableHead>
+                      <TableHead className="text-left p-4">
+                        <button
+                          onClick={() => toggleSort("deliveries")}
+                          className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground uppercase tracking-wider"
+                        >
+                          Entregas
+                          <ArrowUpDown className={cn(
+                            "h-3 w-3 transition-colors",
+                            sortField === "deliveries" ? "text-primary" : "text-muted-foreground"
+                          )} />
+                        </button>
+                      </TableHead>
+                      <TableHead className="text-left p-4">
+                        <button
+                          onClick={() => toggleSort("netValue")}
+                          className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground uppercase tracking-wider"
+                        >
+                          Valor Líquido
+                          <ArrowUpDown className={cn(
+                            "h-3 w-3 transition-colors",
+                            sortField === "netValue" ? "text-primary" : "text-muted-foreground"
+                          )} />
+                        </button>
+                      </TableHead>
+                      <TableHead className="text-left p-4">
+                        <button
+                          onClick={() => toggleSort("hours")}
+                          className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground uppercase tracking-wider"
+                        >
+                          Horas
+                          <ArrowUpDown className={cn(
+                            "h-3 w-3 transition-colors",
+                            sortField === "hours" ? "text-primary" : "text-muted-foreground"
+                          )} />
+                        </button>
+                      </TableHead>
+                      <TableHead className="text-left p-4">
+                        <button
+                          onClick={() => toggleSort("status")}
+                          className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground uppercase tracking-wider"
+                        >
+                          Status
+                          <ArrowUpDown className={cn(
+                            "h-3 w-3 transition-colors",
+                            sortField === "status" ? "text-primary" : "text-muted-foreground"
+                          )} />
+                        </button>
+                      </TableHead>
+                      {canManage && <TableHead className="w-16 p-4"></TableHead>}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="divide-y">
+                    <AnimatePresence>
+                      {filteredClosings.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={canManage ? 8 : 7} className="p-12 text-center">
+                            <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                              <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
+                                <FileText className="h-8 w-8 opacity-50" />
+                              </div>
+                              <div>
+                                <p className="font-medium">Nenhum fechamento encontrado</p>
+                                <p className="text-sm">Tente ajustar seus filtros ou busca</p>
+                              </div>
+                              {activeFiltersCount > 0 && (
+                                <Button variant="outline" size="sm" onClick={clearFilters} className="mt-2">
+                                  <RotateCcw className="h-4 w-4 mr-2" />
+                                  Limpar filtros
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        pagedClosings.map((closing) => {
+                          const isSelected = selectedClosings.has(closing.id)
+                          const status = statusConfig[closing.status]
+
+                          return (
+                            <tr
+                              key={closing.id}
+                              className={cn(
+                                "group transition-colors",
+                                isSelected ? "bg-primary/5" : "hover:bg-muted/50"
+                              )}
+                            >
+                              <TableCell className="p-4">
+                                <button
+                                  onClick={() => toggleSelection(closing.id)}
+                                  className={cn(
+                                    "w-5 h-5 rounded border flex items-center justify-center transition-all",
+                                    isSelected
+                                      ? "bg-primary border-primary text-primary-foreground"
+                                      : "border-input group-hover:border-primary"
+                                  )}
+                                >
+                                  {isSelected && <Check className="h-3 w-3" />}
+                                </button>
+                              </TableCell>
+
+                              <TableCell className="p-4">
+                                <div className="flex items-center gap-3">
+                                  <div className={cn(
+                                    "h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors shrink-0",
+                                    closing.status === "paid"
+                                      ? "bg-emerald-100 text-emerald-700"
+                                      : closing.status === "approved"
+                                        ? "bg-blue-100 text-blue-700"
+                                        : "bg-amber-100 text-amber-700"
+                                  )}>
+                                    {closing.driverName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <p className="font-medium text-foreground truncate">{closing.driverName}</p>
+                                  </div>
+                                </div>
+                              </TableCell>
+
+                              <TableCell className="p-4">
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground whitespace-nowrap">
+                                  <CalendarIcon className="h-3.5 w-3.5 shrink-0" />
+                                  <span>
+                                    {format(new Date(closing.period.start), "dd/MM/yy")} - {format(new Date(closing.period.end), "dd/MM/yy")}
+                                  </span>
+                                </div>
+                              </TableCell>
+
+                              <TableCell className="p-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                                    <Package className="h-4 w-4 text-muted-foreground" />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium">{closing.deliveries.completed}/{closing.deliveries.total}</p>
+                                    <p className="text-xs text-muted-foreground">entregas</p>
+                                  </div>
+                                </div>
+                              </TableCell>
+
+                              <TableCell className="p-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium whitespace-nowrap">
+                                      {new Intl.NumberFormat("pt-BR", {
+                                        style: "currency",
+                                        currency: "BRL",
+                                      }).format(closing.financial.netValue)}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">líquido</p>
+                                  </div>
+                                </div>
+                              </TableCell>
+
+                              <TableCell className="p-4">
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Clock className="h-3.5 w-3.5 shrink-0" />
+                                  <span>{closing.hours.total}h</span>
+                                </div>
+                              </TableCell>
+
+                              <TableCell className="p-4">
+                                <Badge
+                                  variant="outline"
+                                  className={cn(
+                                    "border-0 px-2.5 py-1 font-medium text-xs",
+                                    status.bg,
+                                    status.text,
+                                    status.border
+                                  )}
+                                >
+                                  <span className={cn("w-1.5 h-1.5 rounded-full mr-1.5", status.dot)} />
+                                  {status.label}
+                                </Badge>
+                              </TableCell>
+
+                              <TableCell className="p-4">
+                                <div className={cn(
+                                  "flex items-center justify-end gap-1 transition-opacity duration-200",
+                                  "opacity-0 group-hover:opacity-100"
+                                )}>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => setViewClosing(closing)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  {canManage && (
+                                    <>
+                                      {closing.status === "pending" && (
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-8 w-8 text-blue-600 hover:text-blue-600"
+                                          onClick={() => handleApprove(closing.id)}
+                                        >
+                                          <CheckCircle className="h-4 w-4" />
+                                        </Button>
+                                      )}
+                                      {closing.status === "approved" && (
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-8 w-8 text-emerald-600 hover:text-emerald-600"
+                                          onClick={() => handleMarkPaid(closing.id)}
+                                        >
+                                          <Banknote className="h-4 w-4" />
+                                        </Button>
+                                      )}
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-destructive hover:text-destructive"
+                                        onClick={() => setDeleteId(closing.id)}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </>
+                                  )}
+                                </div>
+                              </TableCell>
+                            </tr>
+                          )
+                        })
+                      )}
+                    </AnimatePresence>
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+
+            <PaginationComponent />
+          </>
+        ) : (
+          // Modo Cards Desktop (> 1300px)
+          <>
+            <div className="grid gap-4 min-[1300px]:grid-cols-2 2xl:grid-cols-2">
               <AnimatePresence>
                 {pagedClosings.map((closing, index) => {
                   const isSelected = selectedClosings.has(closing.id)
@@ -934,7 +944,7 @@ export function ClosingsTable() {
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
                           <div className={cn(
-                            "h-12 w-12 rounded-full flex items-center justify-center text-sm font-bold",
+                            "h-12 w-12 rounded-full flex items-center justify-center text-sm font-bold shrink-0",
                             closing.status === "paid"
                               ? "bg-emerald-100 text-emerald-700"
                               : closing.status === "approved"
@@ -943,8 +953,8 @@ export function ClosingsTable() {
                           )}>
                             {closing.driverName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                           </div>
-                          <div>
-                            <h3 className="font-semibold text-foreground">{closing.driverName}</h3>
+                          <div className="min-w-0">
+                            <h3 className="font-semibold text-foreground truncate">{closing.driverName}</h3>
                             <Badge
                               variant="outline"
                               className={cn(
@@ -959,7 +969,7 @@ export function ClosingsTable() {
                           </div>
                         </div>
                         {isSelected && (
-                          <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
+                          <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center shrink-0">
                             <Check className="h-4 w-4 text-primary-foreground" />
                           </div>
                         )}
@@ -967,18 +977,18 @@ export function ClosingsTable() {
 
                       <div className="space-y-2 text-sm">
                         <div className="flex items-center gap-2 text-muted-foreground">
-                          <CalendarIcon className="h-4 w-4" />
-                          <span>
-                            {format(new Date(closing.period.start), "dd/MM/yyyy")} - {format(new Date(closing.period.end), "dd/MM/yyyy")}
+                          <CalendarIcon className="h-4 w-4 shrink-0" />
+                          <span className="text-xs">
+                            {format(new Date(closing.period.start), "dd/MM/yy")} - {format(new Date(closing.period.end), "dd/MM/yy")}
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
-                          <Package className="h-4 w-4" />
-                          <span>{closing.deliveries.completed}/{closing.deliveries.total} entregas</span>
+                          <Package className="h-4 w-4 shrink-0" />
+                          <span className="text-xs">{closing.deliveries.completed}/{closing.deliveries.total} entregas</span>
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
-                          <DollarSign className="h-4 w-4" />
-                          <span className="font-medium text-foreground">
+                          <DollarSign className="h-4 w-4 shrink-0" />
+                          <span className="font-medium text-foreground text-xs">
                             {new Intl.NumberFormat("pt-BR", {
                               style: "currency",
                               currency: "BRL",
@@ -986,11 +996,11 @@ export function ClosingsTable() {
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
-                          <Clock className="h-4 w-4" />
-                          <span>{closing.hours.total}h trabalhadas</span>
+                          <Clock className="h-4 w-4 shrink-0" />
+                          <span className="text-xs">{closing.hours.total}h trabalhadas</span>
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground text-xs pt-2 border-t">
-                          <FileText className="h-3 w-3" />
+                          <FileText className="h-3 w-3 shrink-0" />
                           Criado em {format(new Date(closing.createdAt), "dd/MM/yyyy", { locale: ptBR })}
                         </div>
                       </div>
@@ -1058,7 +1068,6 @@ export function ClosingsTable() {
               </AnimatePresence>
             </div>
 
-            {/* Empty State para Cards */}
             {filteredClosings.length === 0 && (
               <div className="flex flex-col items-center gap-3 text-muted-foreground p-12">
                 <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
@@ -1079,16 +1088,206 @@ export function ClosingsTable() {
 
             <PaginationComponent />
           </>
-        )
-      }
+        )}
+      </div>
 
-      {/* Dialog de Visualizar Detalhes */}
+      {/* Conteúdo - Até 1300px (Cards responsivos) */}
+      <div className="min-[1300px]:hidden">
+        <div className="grid gap-3 sm:grid-cols-2 lg:2">
+          <AnimatePresence>
+            {pagedClosings.map((closing, index) => {
+              const isSelected = selectedClosings.has(closing.id)
+              const status = statusConfig[closing.status]
+
+              return (
+                <motion.div
+                  key={closing.id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.2, delay: index * 0.05 }}
+                  className={cn(
+                    "relative p-4 rounded-xl border-2 transition-all active:scale-[0.98]",
+                    isSelected
+                      ? "border-primary bg-primary/5 shadow-md"
+                      : "border-border bg-card shadow-sm"
+                  )}
+                >
+                  {/* Header do Card */}
+                  <div className="flex items-start gap-3 mb-3">
+                    <div 
+                      onClick={() => toggleSelection(closing.id)}
+                      className={cn(
+                        "h-10 w-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors cursor-pointer",
+                        isSelected
+                          ? "bg-primary text-primary-foreground"
+                          : closing.status === "paid"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : closing.status === "approved"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-amber-100 text-amber-700"
+                      )}
+                    >
+                      {isSelected ? (
+                        <Check className="h-5 w-5" />
+                      ) : (
+                        closing.driverName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground text-sm leading-tight truncate">
+                        {closing.driverName}
+                      </h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "border-0 px-1.5 py-0 text-[10px] font-medium",
+                            status.bg,
+                            status.text
+                          )}
+                        >
+                          <span className={cn("w-1 h-1 rounded-full mr-1", status.dot)} />
+                          {status.label}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* Menu de ações simplificado */}
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 -mr-2"
+                        onClick={() => setViewClosing(closing)}
+                      >
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Informações principais */}
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center justify-between py-1.5 border-b border-border/50">
+                      <span className="text-muted-foreground flex items-center gap-1.5">
+                        <CalendarIcon className="h-3.5 w-3.5" />
+                        Período
+                      </span>
+                      <span className="text-foreground">
+                        {format(new Date(closing.period.start), "dd/MM")} - {format(new Date(closing.period.end), "dd/MM")}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between py-1.5 border-b border-border/50">
+                      <span className="text-muted-foreground flex items-center gap-1.5">
+                        <Package className="h-3.5 w-3.5" />
+                        Entregas
+                      </span>
+                      <span className="text-foreground font-medium">
+                        {closing.deliveries.completed}/{closing.deliveries.total}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between py-1.5 border-b border-border/50">
+                      <span className="text-muted-foreground flex items-center gap-1.5">
+                        <DollarSign className="h-3.5 w-3.5" />
+                        Valor Líquido
+                      </span>
+                      <span className="font-medium text-emerald-600">
+                        {new Intl.NumberFormat("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        }).format(closing.financial.netValue)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between py-1.5">
+                      <span className="text-muted-foreground flex items-center gap-1.5">
+                        <Clock className="h-3.5 w-3.5" />
+                        Horas
+                      </span>
+                      <span className="text-foreground">
+                        {closing.hours.total}h
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Botões de ação para mobile */}
+                  {canManage && (
+                    <div className="flex gap-2 mt-3 pt-3 border-t">
+                      {closing.status === "pending" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 h-9 text-xs bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                          onClick={() => handleApprove(closing.id)}
+                        >
+                          <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                          Aprovar
+                        </Button>
+                      )}
+                      {closing.status === "approved" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 h-9 text-xs bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
+                          onClick={() => handleMarkPaid(closing.id)}
+                        >
+                          <Banknote className="h-3.5 w-3.5 mr-1.5" />
+                          Pagar
+                        </Button>
+                      )}
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className={cn(
+                          "h-9 text-xs",
+                          closing.status === "pending" || closing.status === "approved" ? "flex-1" : "w-full"
+                        )}
+                        onClick={() => setDeleteId(closing.id)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                        Excluir
+                      </Button>
+                    </div>
+                  )}
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
+        </div>
+
+        {/* Empty State Mobile */}
+        {filteredClosings.length === 0 && (
+          <div className="flex flex-col items-center gap-3 text-muted-foreground p-8">
+            <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center">
+              <FileText className="h-7 w-7 opacity-50" />
+            </div>
+            <div className="text-center">
+              <p className="font-medium text-sm">Nenhum fechamento encontrado</p>
+              <p className="text-xs mt-1">Tente ajustar seus filtros</p>
+            </div>
+            {activeFiltersCount > 0 && (
+              <Button variant="outline" size="sm" onClick={clearFilters} className="mt-2 text-xs">
+                <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                Limpar filtros
+              </Button>
+            )}
+          </div>
+        )}
+
+        <PaginationComponent />
+      </div>
+
+      {/* Dialog de Visualizar Detalhes - Responsivo */}
       <Dialog open={!!viewClosing} onOpenChange={() => setViewClosing(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="max-w-lg w-[calc(100vw-2rem)] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="flex items-center gap-3 text-base sm:text-lg">
               <div className={cn(
-                "h-12 w-12 rounded-full flex items-center justify-center text-sm font-bold",
+                "h-10 w-10 sm:h-12 sm:w-12 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold shrink-0",
                 viewClosing?.status === "paid"
                   ? "bg-emerald-100 text-emerald-700"
                   : viewClosing?.status === "approved"
@@ -1097,21 +1296,21 @@ export function ClosingsTable() {
               )}>
                 {viewClosing?.driverName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
               </div>
-              {viewClosing?.driverName}
+              <span className="leading-tight">{viewClosing?.driverName}</span>
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">
               Detalhes completos do fechamento
             </DialogDescription>
           </DialogHeader>
 
           {viewClosing && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6 mt-4">
               {/* Status */}
-              <div className="flex items-center gap-3">
-                <span className="font-medium text-foreground">Status:</span>
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <span className="text-sm font-medium text-foreground">Status</span>
                 <Badge
                   className={cn(
-                    "px-3 py-1",
+                    "px-2.5 py-1 text-xs",
                     statusConfig[viewClosing.status].bg,
                     statusConfig[viewClosing.status].text,
                     statusConfig[viewClosing.status].border
@@ -1122,61 +1321,61 @@ export function ClosingsTable() {
               </div>
 
               {/* Período */}
-              <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
-                    <CalendarIcon className="h-4 w-4" />
-                    Início do Período
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <div className="p-3 bg-muted/30 rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                    <CalendarIcon className="h-3 w-3" />
+                    Início
                   </p>
-                  <p className="font-mono text-foreground">
+                  <p className="font-mono text-sm text-foreground">
                     {format(new Date(viewClosing.period.start), "dd/MM/yyyy")}
                   </p>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
-                    <CalendarIcon className="h-4 w-4" />
-                    Fim do Período
+                <div className="p-3 bg-muted/30 rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                    <CalendarIcon className="h-3 w-3" />
+                    Fim
                   </p>
-                  <p className="font-mono text-foreground">
+                  <p className="font-mono text-sm text-foreground">
                     {format(new Date(viewClosing.period.end), "dd/MM/yyyy")}
                   </p>
                 </div>
               </div>
 
               {/* Entregas */}
-              <div className="border-t pt-4">
-                <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
-                  <Package className="h-4 w-4" />
+              <div className="p-3 bg-muted/30 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                  <Package className="h-3 w-3" />
                   Entregas
                 </p>
-                <div className="bg-muted/50 p-3 rounded-md flex justify-between items-center">
-                  <span className="text-foreground font-medium">Completadas</span>
-                  <span className="text-2xl font-bold text-primary">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-foreground">Completadas</span>
+                  <span className="text-xl sm:text-2xl font-bold text-primary">
                     {viewClosing.deliveries.completed}/{viewClosing.deliveries.total}
                   </span>
                 </div>
               </div>
 
               {/* Valores */}
-              <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
-                    <DollarSign className="h-4 w-4" />
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <div className="p-3 bg-muted/30 rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                    <TrendingUp className="h-3 w-3" />
                     Valor Bruto
                   </p>
-                  <p className="text-foreground">
+                  <p className="text-sm text-foreground">
                     {new Intl.NumberFormat("pt-BR", {
                       style: "currency",
                       currency: "BRL",
                     }).format(viewClosing.financial.grossValue)}
                   </p>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
-                    <DollarSign className="h-4 w-4" />
+                <div className="p-3 bg-muted/30 rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                    <Wallet className="h-3 w-3" />
                     Valor Líquido
                   </p>
-                  <p className="text-foreground font-bold">
+                  <p className="text-sm font-bold text-emerald-600">
                     {new Intl.NumberFormat("pt-BR", {
                       style: "currency",
                       currency: "BRL",
@@ -1186,35 +1385,40 @@ export function ClosingsTable() {
               </div>
 
               {/* Horas */}
-              <div className="border-t pt-4">
-                <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
+              <div className="p-3 bg-muted/30 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
                   Horas Trabalhadas
                 </p>
-                <div className="bg-muted/50 p-3 rounded-md">
-                  <p className="text-2xl font-bold text-foreground">{viewClosing.hours.total}h</p>
-                </div>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{viewClosing.hours.total}h</p>
               </div>
 
               {/* Datas */}
-              <div className="grid grid-cols-2 gap-4 border-t pt-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 border-t pt-4">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
-                    <FileText className="h-4 w-4" />
+                  <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                    <FileText className="h-3 w-3" />
                     Criado em
                   </p>
-                  <p className="text-foreground">
+                  <p className="text-sm text-foreground">
                     {format(new Date(viewClosing.createdAt), "dd/MM/yyyy", { locale: ptBR })}
                   </p>
                 </div>
-
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">ID</p>
+                  <p className="font-mono text-xs text-muted-foreground truncate">
+                    {viewClosing.id.slice(0, 12)}...
+                  </p>
+                </div>
               </div>
 
               {/* Ações */}
-              <div className="flex gap-2 border-t pt-4">
+              <div className="flex flex-col sm:flex-row gap-2 pt-2">
                 {canManage && viewClosing.status === "pending" && (
                   <Button
                     variant="default"
+                    size="sm"
+                    className="flex-1 h-10 sm:h-11"
                     onClick={() => {
                       handleApprove(viewClosing.id)
                       setViewClosing(null)
@@ -1227,7 +1431,8 @@ export function ClosingsTable() {
                 {canManage && viewClosing.status === "approved" && (
                   <Button
                     variant="default"
-                    className="bg-emerald-600 hover:bg-emerald-700"
+                    size="sm"
+                    className="flex-1 h-10 sm:h-11 bg-emerald-600 hover:bg-emerald-700"
                     onClick={() => {
                       handleMarkPaid(viewClosing.id)
                       setViewClosing(null)
@@ -1239,6 +1444,8 @@ export function ClosingsTable() {
                 )}
                 <Button
                   variant="outline"
+                  size="sm"
+                  className="flex-1 h-10 sm:h-11"
                   onClick={() => setViewClosing(null)}
                 >
                   Fechar
@@ -1250,24 +1457,24 @@ export function ClosingsTable() {
       </Dialog>
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-base">Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
               Tem certeza que deseja excluir este fechamento? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel className="mt-0 sm:mt-0 h-10 sm:h-11">Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 sm:h-11"
             >
               Excluir
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div >
+    </div>
   )
 }

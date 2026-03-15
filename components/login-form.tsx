@@ -153,7 +153,7 @@ export function LoginForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-12 border-gray-200 focus:border-emerald-500 focus:ring-emerald-500"
+                    className="h-12 border-gray-200 text-gray-700 focus:border-emerald-500 focus:ring-emerald-500"
                   />
                 </Field>
                 <Field>
@@ -164,7 +164,7 @@ export function LoginForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="h-12 border-gray-200 focus:border-emerald-500 focus:ring-emerald-500"
+                    className="h-12 border-gray-200 text-gray-700 focus:border-emerald-500 focus:ring-emerald-500"
                   />
                 </Field>
               </FieldGroup>

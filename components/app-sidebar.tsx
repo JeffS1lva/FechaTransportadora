@@ -92,6 +92,7 @@ export function AppSidebar() {
   }
 
   const isManager = user?.role === "admin" || user?.role === "editor"
+  const isAdmin = user?.role === "admin"  // Nova verificação apenas para admin
   const navItems = isManager ? adminNavItems : viewerNavItems
   const usersNav = isManager ? usersNavItem : null
 
@@ -281,7 +282,8 @@ export function AppSidebar() {
             })}
           </nav>
 
-          {usersNav && (
+          {/* Botão de Configurações - Apenas para Admin */}
+          {isAdmin && usersNav && (
             <div className="mt-auto p-3">
               <div className="relative">
                 <Button

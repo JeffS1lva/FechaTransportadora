@@ -8,7 +8,7 @@ import { RecentClosings } from "@/components/dashboard/recent-closings"
 export default function DashboardPage() {
   return (
     <AppShell>
-      <div className="space-y-6">
+      <div className="space-y-6 pt-15 sm:pt-15 md:pt-15 lg:p-0">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground pt-3">
