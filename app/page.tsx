@@ -1,4 +1,3 @@
-// app/page.tsx (HomePage)
 "use client"
 
 import { useEffect } from "react"
@@ -19,35 +18,19 @@ export default function HomePage() {
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-background p-4">
-        <div className="flex flex-col items-center gap-4">
-          <Spinner size="lg" />
-          <p className="text-sm text-muted-foreground animate-pulse">
-            Carregando...
-          </p>
-        </div>
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner size="lg" />
       </div>
     )
   }
 
   if (user) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-background p-4">
-        <div className="flex flex-col items-center gap-4">
-          <Spinner size="lg" />
-          <p className="text-sm text-muted-foreground">
-            Redirecionando...
-          </p>
-        </div>
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner size="lg" />
       </div>
     )
   }
 
-  return (
-    <main className="flex-1 flex items-center justify-center bg-background p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-md mx-auto">
-        <LoginForm />
-      </div>
-    </main>
-  )
+  return <LoginForm />
 }
