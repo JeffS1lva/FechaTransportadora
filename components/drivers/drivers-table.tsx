@@ -398,7 +398,7 @@ export function DriversTable() {
   }
 
   return (
-    <div className="space-y-4 px-2 sm:px-0 xl:px-0">
+    <div className="space-y-4 ">
       {/* Header de Controle - Responsivo */}
       <div className="flex flex-col gap-4 p-3 sm:p-4 bg-card rounded-xl border shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

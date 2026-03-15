@@ -13,7 +13,7 @@ export default function MotoristasPage() {
 
   return (
     <AppShell>
-      <div className="space-y-4 sm:space-y-6 px-2 sm:px-4 xl:px-0">
+      <div className="space-y-4 sm:space-y-6 ">
         {/* Header responsivo */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
           <div className="space-y-1 pt-15 sm:pt-15 md:pt-15 lg:p-0">
