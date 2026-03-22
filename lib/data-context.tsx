@@ -10,6 +10,7 @@ interface DataContextType {
   updateDriver: (id: string, driver: Partial<Driver>) => void
   deleteDriver: (id: string) => void
   addClosing: (data: ClosingFormData) => void
+  updateClosing: (id: string, data: Partial<ClosingFormData>) => void
   updateClosingStatus: (id: string, status: Closing["status"], approvedBy?: string) => void
   deleteClosing: (id: string) => void
   importClosings: (closings: ClosingFormData[]) => void
@@ -192,7 +193,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, [closings, isInitialized])
 
   const generateDriverId = () => {
-    // Use crypto.randomUUID when available to avoid collisions during fast imports.
     if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
       return crypto.randomUUID()
     }
@@ -264,6 +264,55 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setClosings((prev) => [...prev, newClosing])
   }
 
+  const updateClosing = (id: string, data: Partial<ClosingFormData>) => {
+    setClosings((prev) =>
+      prev.map((c) => {
+        if (c.id !== id) return c
+
+        const driver = data.driverId 
+          ? drivers.find((d) => d.id === data.driverId) 
+          : undefined
+
+        const commission = data.grossValue !== undefined && data.commissionRate !== undefined
+          ? data.grossValue * (data.commissionRate / 100)
+          : c.financial.commission
+
+        const netValue = data.grossValue !== undefined
+          ? data.grossValue - commission - (data.fuelCost ?? c.financial.fuelCost) - (data.advances ?? c.financial.advances) - (data.discounts ?? c.financial.discounts)
+          : c.financial.netValue
+
+        return {
+          ...c,
+          driverId: data.driverId ?? c.driverId,
+          driverName: driver?.name ?? c.driverName,
+          period: {
+            start: data.periodStart ?? c.period.start,
+            end: data.periodEnd ?? c.period.end,
+          },
+          deliveries: {
+            total: data.totalDeliveries ?? c.deliveries.total,
+            completed: data.completedDeliveries ?? c.deliveries.completed,
+            canceled: data.canceledDeliveries ?? c.deliveries.canceled,
+            kmDriven: data.kmDriven ?? c.deliveries.kmDriven,
+          },
+          financial: {
+            grossValue: data.grossValue ?? c.financial.grossValue,
+            commission,
+            fuelCost: data.fuelCost ?? c.financial.fuelCost,
+            advances: data.advances ?? c.financial.advances,
+            discounts: data.discounts ?? c.financial.discounts,
+            netValue,
+          },
+          hours: {
+            regular: data.regularHours ?? c.hours.regular,
+            overtime: data.overtimeHours ?? c.hours.overtime,
+            total: (data.regularHours ?? c.hours.regular) + (data.overtimeHours ?? c.hours.overtime),
+          },
+        }
+      })
+    )
+  }
+
   const updateClosingStatus = (id: string, status: Closing["status"], approvedBy?: string) => {
     setClosings((prev) =>
       prev.map((c) =>
@@ -296,6 +345,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         updateDriver,
         deleteDriver,
         addClosing,
+        updateClosing,
         updateClosingStatus,
         deleteClosing,
         importClosings,

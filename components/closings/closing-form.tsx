@@ -388,7 +388,7 @@ export function ClosingForm() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2 w-full sm:w-auto h-10 sm:h-11">
+        <Button className="gap-2 w-full sm:w-auto h-10 sm:h-11 cursor-pointer">
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">Novo Fechamento</span>
           <span className="sm:hidden">Novo</span>

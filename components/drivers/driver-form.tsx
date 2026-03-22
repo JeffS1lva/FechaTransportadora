@@ -175,7 +175,7 @@ export function DriverForm({
   }
 
   const triggerButton = (
-    <Button>
+    <Button className="w-full sm:w-auto h-10 sm:h-11 cursor-pointer">
       <Plus className="h-4 w-4 mr-2" />
       Novo Motorista
     </Button>
