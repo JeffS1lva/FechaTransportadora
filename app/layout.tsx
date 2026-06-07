@@ -20,8 +20,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Fechamento de Motoristas',
-  description: 'Sistema de gestão de fechamento de motoristas',
+  title: 'NexHub Transport',
+  description: 'NexHub - Sistema de gestão de fechamento de motoristas',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -34,8 +34,7 @@ export const metadata: Metadata = {
         media: '(prefers-color-scheme: dark)',
       },
       {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
+        url: '/favicon.ico',
       },
     ],
     apple: '/apple-icon.png',

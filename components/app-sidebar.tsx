@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { cn } from "@/lib/utils"
@@ -195,8 +196,8 @@ export function AppSidebar() {
         )}>
           <div className="relative group">
             <div className="absolute inset-0 bg-primary/20 rounded-xl blur-xl group-hover:bg-primary/30 transition-all duration-500" />
-            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary via-primary to-primary/80 shadow-lg shadow-primary/30 ring-1 ring-white/20 group-hover:scale-105 transition-transform duration-300">
-              <Truck className="h-6 w-6 text-primary-foreground" />
+            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl overflow-hidden bg-black shadow-lg shadow-primary/30 ring-1 ring-white/20 group-hover:scale-105 transition-transform duration-300">
+              <Image src="/logo-nexhub.png" alt="NexHub" width={48} height={48} className="object-contain" />
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background animate-pulse" />
             </div>
           </div>
@@ -204,7 +205,7 @@ export function AppSidebar() {
           {!collapsed && (
             <div className="overflow-hidden flex-1">
               <h1 className="font-bold text-lg leading-tight bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                Fechamentos
+                NexHub
               </h1>
               <div className="flex items-center gap-1.5 mt-1">
                 <Activity className="h-3 w-3 text-green-500" />

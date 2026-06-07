@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -75,12 +76,12 @@ export function LoginForm() {
         
         {/* Header */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-            <Truck className="h-6 w-6 text-white" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-black overflow-hidden">
+            <Image src="/logo-nexhub.png" alt="NexHub" width={48} height={48} className="object-contain" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Fechamento de Motoristas</h1>
-            <p className="text-emerald-100 text-sm">Sistema de Gestão Logística</p>
+            <h1 className="text-2xl font-bold tracking-tight">NexHub</h1>
+            <p className="text-emerald-100 text-sm">Fechamento de Motoristas</p>
           </div>
         </div>
 
@@ -119,7 +120,7 @@ export function LoginForm() {
 
         {/* Footer */}
         <div className="relative z-10 text-sm text-emerald-200">
-          <p>© 2024 Fechamento de Motoristas. Todos os direitos reservados.</p>
+          <p>© 2025 NexHub. Todos os direitos reservados.</p>
         </div>
       </div>
 
@@ -128,8 +129,8 @@ export function LoginForm() {
         <Card className="w-full max-w-md shadow-xl border-0 bg-white">
           <CardHeader className="text-center space-y-4">
             {/* Logo Mobile (visível apenas em telas pequenas) */}
-            <div className="lg:hidden mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-              <Truck className="h-7 w-7 text-emerald-600" />
+            <div className="lg:hidden mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-black overflow-hidden shadow">
+              <Image src="/logo-nexhub.png" alt="NexHub" width={56} height={56} className="object-contain" />
             </div>
             
             <div className="space-y-2">
